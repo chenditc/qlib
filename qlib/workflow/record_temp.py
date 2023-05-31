@@ -313,13 +313,15 @@ class SigAnaRecord(ACRecordTemp):
             logger.warning(f"Empty label.")
             return
         ic, ric = calc_ic(pred.iloc[:, 0], label.iloc[:, self.label_col])
+        weighted_ic = calc_weighted_ic(pred.iloc[:, 0], label.iloc[:, self.label_col])
         metrics = {
             "IC": ic.mean(),
             "ICIR": ic.mean() / ic.std(),
+            "Weighted IC": weighted_ic.mean(),
             "Rank IC": ric.mean(),
             "Rank ICIR": ric.mean() / ric.std(),
         }
-        objects = {"ic.pkl": ic, "ric.pkl": ric}
+        objects = {"ic.pkl": ic, "ric.pkl": ric, "weighted_ic.pkl": weighted_ic}
         if self.ana_long_short:
             long_short_r, long_avg_r = calc_long_short_return(pred.iloc[:, 0], label.iloc[:, self.label_col])
             metrics.update(

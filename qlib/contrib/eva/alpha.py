@@ -179,6 +179,48 @@ def calc_ic(pred: pd.Series, label: pd.Series, date_col="datetime", dropna=False
     else:
         return ic, ric
 
+def calc_weighted_ic(pred: pd.Series, label: pd.Series, date_col="datetime", dropna=False) -> pd.Series:
+    """calc_weighted_ic. Use min-max normed pred as weight for calcualting ic.
+
+    Parameters
+    ----------
+    pred :
+        pred
+    label :
+        label
+    date_col :
+        date_col
+
+    Returns
+    -------
+    pd.Series
+        ic
+    """
+    df = pd.DataFrame({"pred": pred, "label": label})
+
+    def weighted_corr(df):
+        """Calculate the weighted Pearson correlation."""
+        # min-max normalization for weights
+        weight = (df['pred'] - df['pred'].min()) / (df['pred'].max() - df['pred'].min())
+        pred, label = df['pred'], df['label']
+
+        pred_bar = np.average(pred, weights=weight)
+        label_bar = np.average(label, weights=weight)
+
+        cov_matrix = np.cov(pred, label, aweights=weight)
+        weighted_cov = cov_matrix[0, 1]
+
+        pred_var = np.average((pred - pred_bar) ** 2, weights=weight)
+        label_var = np.average((label - label_bar) ** 2, weights=weight)
+
+        return weighted_cov / np.sqrt(pred_var * label_var)
+
+    weighted_ic = df.groupby(date_col).apply(weighted_corr)
+
+    if dropna:
+        return weighted_ic.dropna()
+    else:
+        return weighted_ic
 
 def calc_all_ic(pred_dict_all, label, date_col="datetime", dropna=False, n_jobs=-1):
     """calc_all_ic.
