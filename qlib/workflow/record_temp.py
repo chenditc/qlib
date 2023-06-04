@@ -17,7 +17,7 @@ from ..log import get_module_logger
 from ..utils import fill_placeholder, flatten_dict, class_casting, get_date_by_shift
 from ..utils.time import Freq
 from ..utils.data import deepcopy_basic_type
-from ..contrib.eva.alpha import calc_ic, calc_long_short_return, calc_long_short_prec
+from ..contrib.eva.alpha import calc_ic, calc_weighted_ic, calc_long_short_return, calc_long_short_prec
 
 
 logger = get_module_logger("workflow", logging.INFO)

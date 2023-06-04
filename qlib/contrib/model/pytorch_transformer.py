@@ -167,8 +167,8 @@ class TransformerModel(Model):
         save_path=None,
     ):
 
-        df_train, df_valid, df_test = dataset.prepare(
-            ["train", "valid", "test"],
+        df_train, df_valid = dataset.prepare(
+            ["train", "valid"],
             col_set=["feature", "label"],
             data_key=DataHandlerLP.DK_L,
         )
@@ -275,8 +275,11 @@ class Transformer(nn.Module):
         self.d_feat = d_feat
 
     def forward(self, src):
+        # Extract the feature of each time step as the last dimension
+        # N: number of samples, T: time steps, F: features
         # src [N, F*T] --> [N, T, F]
         src = src.reshape(len(src), self.d_feat, -1).permute(0, 2, 1)
+        # A projection layer to create learnable embedding from continous raw input features
         src = self.feature_layer(src)
 
         # src [N, T, F] --> [T, N, F], [60, 512, 8]

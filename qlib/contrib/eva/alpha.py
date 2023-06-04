@@ -4,6 +4,8 @@ Here is a batch of evaluation functions.
 The interface should be redesigned carefully in the future.
 """
 import pandas as pd
+import numpy as np
+from scipy.special import softmax
 from typing import Tuple
 from qlib import get_module_logger
 from qlib.utils.paral import complex_parallel, DelayedDict
@@ -201,7 +203,15 @@ def calc_weighted_ic(pred: pd.Series, label: pd.Series, date_col="datetime", dro
     def weighted_corr(df):
         """Calculate the weighted Pearson correlation."""
         # min-max normalization for weights
-        weight = (df['pred'] - df['pred'].min()) / (df['pred'].max() - df['pred'].min())
+        #weight = (df['pred'] - df['pred'].min()) / (df['pred'].max() - df['pred'].min())
+        # Softmax normalization for weights
+        #weight = softmax(df['pred'])
+
+        # Sort the predictions in descending order and get their rank as weights
+        df["weight"] = df['pred'].rank(pct=True)
+        df['weight'] = df['weight'].apply(lambda x: x + 0.1)
+        weight = df['weight'].values 
+
         pred, label = df['pred'], df['label']
 
         pred_bar = np.average(pred, weights=weight)
